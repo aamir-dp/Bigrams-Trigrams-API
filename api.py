@@ -3,11 +3,13 @@ from pydantic import BaseModel
 from typing import List, Dict
 from collections import Counter
 from nltk.util import ngrams
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 from string import punctuation
-import spacy
 
-# Load the spaCy model
-nlp = spacy.load("ru_core_news_sm")
+# Download NLTK resources (if not already downloaded)
+import nltk
+nltk.data.path.append("C:/nltk_data")  # Update this path to where you saved the data
 
 # FastAPI app
 app = FastAPI(title="NLP API", description="API for generating unigrams, bigrams, and trigrams.")
@@ -19,16 +21,17 @@ class TextData(BaseModel):
     top_n: int = 10      # Default to top 10
 
 # Preprocess text
-def preprocess_text(text: str):
-    doc = nlp(text.lower())
-    tokens = [
-        token.lemma_ for token in doc
-        if token.is_alpha and token.text not in nlp.Defaults.stop_words and token.text not in punctuation
+def preprocess_text(text: str) -> List[str]:
+    stop_words = set(stopwords.words("english"))
+    tokens = word_tokenize(text.lower())  # Tokenize and lowercase the text
+    filtered_tokens = [
+        token for token in tokens 
+        if token.is_alpha and token not in stop_words and token not in punctuation
     ]
-    return tokens
+    return filtered_tokens
 
 # Generate n-grams
-def generate_ngrams(tokens: List[str], n: int):
+def generate_ngrams(tokens: List[str], n: int) -> List[str]:
     return [' '.join(gram) for gram in ngrams(tokens, n)]
 
 @app.post("/ngrams")
