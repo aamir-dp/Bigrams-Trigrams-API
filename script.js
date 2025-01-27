@@ -4,7 +4,7 @@ const resultDiv = document.getElementById("result");
 const ngramList = document.getElementById("ngram-list");
 
 // Your API URL
-const API_URL = "http://127.0.0.1:8000/ngrams"; // Replace with your actual deployed URL
+const API_URL = "https://bigrams-trigrams-api.onrender.com/ngrams"; // Replace with your actual deployed URL
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
