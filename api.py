@@ -1,3 +1,5 @@
+import nltk
+import os
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -5,29 +7,33 @@ from collections import Counter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
-import os
 import re
 
-# Load API key from environment variables
-API_KEY = os.getenv("API_KEY")
-
-# Initialize FastAPI app
+# Initialize FastAPI
 app = FastAPI()
 
-# Add CORS middleware to restrict frontend access
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://aamir-dp.github.io"],  # Replace with your frontend's domain
+    allow_origins=["https://aamir-dp.github.io"],  # Replace with your frontend domain
     allow_credentials=True,
     allow_methods=["POST"],
     allow_headers=["Content-Type", "api_key"],
 )
 
-# Preload NLTK resources
-nltk_path = os.path.join(os.path.dirname(__file__), "nltk_data")
-stop_words = set(stopwords.words("english"))
+# Set NLTK data directory to a writable location (e.g., /tmp)
+nltk_path = "/tmp/nltk_data"
+os.makedirs(nltk_path, exist_ok=True)
+nltk.data.path.append(nltk_path)
 
-# Function to generate n-grams
+# Ensure necessary NLTK resources are available
+try:
+    stop_words = set(stopwords.words("english"))
+except LookupError:
+    nltk.download("stopwords", download_dir=nltk_path)  # Download stopwords dynamically
+    stop_words = set(stopwords.words("english"))
+
+# Function to extract n-grams
 def extract_keywords_with_counts(text: str, ngram_range: int = 1):
     text = re.sub(r"[^\w\s]", "", text)
     words = word_tokenize(text.lower())
@@ -44,16 +50,15 @@ def extract_keywords_with_counts(text: str, ngram_range: int = 1):
 
     return [{"keyword": keyword, "count": count} for keyword, count in keywords]
 
-# Request model
+# API endpoint
 class TextData(BaseModel):
     text: str
     ngram_size: int = 1
 
-# API endpoint
 @app.post("/ngrams")
 def get_keywords(data: TextData, api_key: str = Header(None)):
-    if api_key != API_KEY:  # Validate the API key
+    if api_key != os.getenv("API_KEY"):  # Validate API key
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    keywords = extract_keywords_with_counts(data.text, ngram_range=data.ngram_size)
+    keywords = extract_keywords_with_counts(data.text, data.ngram_size)
     return {"ngram_size": data.ngram_size, "keywords": keywords}
