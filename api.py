@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 import re
 import nltk
 
@@ -49,6 +50,8 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
 )
+
+logging.basicConfig(level=logging.DEBUG) #vercel debug logging
 
 # Request model
 class TextData(BaseModel):
