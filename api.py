@@ -23,10 +23,25 @@ app.add_middleware(
     allow_headers=["Content-Type", "api_key"],
 )
 
+<<<<<<< Updated upstream
 # Preload NLTK resources
 nltk_path = os.path.join(os.path.dirname(__file__), "nltk_data")
 stop_words = set(stopwords.words("english"))
 
+=======
+# Configure writable NLTK data path
+nltk_path = "/tmp/nltk_data"
+os.makedirs(nltk_path, exist_ok=True)
+nltk.data.path.append(nltk_path)
+
+# Dynamically download NLTK resources if unavailable
+try:
+    stop_words = set(stopwords.words("english"))
+except LookupError:
+    nltk.download("stopwords", download_dir=nltk_path)  # Download stopwords dynamically
+    stop_words = set(stopwords.words("english"))
+
+>>>>>>> Stashed changes
 # Function to generate n-grams
 def extract_keywords_with_counts(text: str, ngram_range: int = 1):
     text = re.sub(r"[^\w\s]", "", text)

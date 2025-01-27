@@ -10,12 +10,16 @@
     <div class="container">
         <h1>Keyword Extraction Tool</h1>
         <form id="ngram-form">
-            <textarea id="input-text" placeholder="Paste your text here..." rows="5"></textarea>
+            <textarea id="input-text" placeholder="Paste your text here..." rows="5" required></textarea>
+            <label for="ngram-size">Select N-Gram Size:</label>
             <select id="ngram-size">
                 <option value="1">Unigrams</option>
                 <option value="2" selected>Bigrams</option>
                 <option value="3">Trigrams</option>
+                <option value="4">Fourgrams</option>
+                <option value="5">Fivegrams</option>
             </select>
+            <label for="api-key">Enter API Key:</label>
             <input type="password" id="api-key" placeholder="Enter your API key" required />
             <button type="submit">Generate N-Grams</button>
         </form>
