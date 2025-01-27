@@ -4,7 +4,7 @@ const resultDiv = document.getElementById("result");
 const ngramList = document.getElementById("ngram-list");
 
 // Your API URL
-const API_URL = "https://your-project-name.vercel.app/ngrams";
+const API_URL = "http://127.0.0.1:8000/ngrams"; // Replace with your actual deployed URL
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -23,7 +23,6 @@ form.addEventListener("submit", async (e) => {
             body: JSON.stringify({
                 text: text,
                 ngram_size: parseInt(ngramSize),
-                top_n: 10, // Fetch top 10 n-grams
             }),
         });
 
@@ -35,9 +34,9 @@ form.addEventListener("submit", async (e) => {
 
         // Update results on the page
         ngramList.innerHTML = "";
-        data.top_ngrams.forEach((ngram) => {
+        data.keywords.forEach((ngram) => {
             const listItem = document.createElement("li");
-            listItem.textContent = `${ngram.phrase} (${ngram.count})`;
+            listItem.textContent = `${ngram.keyword} (${ngram.count})`;
             ngramList.appendChild(listItem);
         });
     } catch (error) {

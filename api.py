@@ -1,57 +1,75 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List
 from collections import Counter
-from nltk.util import ngrams
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from string import punctuation
-
-# Download NLTK resources (if not already downloaded)
+from nltk.util import ngrams
+from fastapi.middleware.cors import CORSMiddleware
+import re
 import nltk
-nltk.data.path.append("C:/nltk_data")  # Update this path to where you saved the data
 
-# FastAPI app
-app = FastAPI(title="NLP API", description="API for generating unigrams, bigrams, and trigrams.")
+# Ensure necessary NLTK resources are available
+nltk.download("punkt")
+nltk.download("stopwords")
+
+# Initialize FastAPI app
+app = FastAPI(title="Keyword Extraction API", description="API for generating unigrams, bigrams, trigrams, etc.")
+
+# Preload English stopwords
+stop_words = set(stopwords.words('english'))
+
+# Function to extract n-grams
+def extract_keywords_with_counts(text: str, ngram_range: int = 1) -> List[dict]:
+    # Normalize the text: Remove punctuation
+    text = re.sub(r'[^\w\s]', '', text)  # Keep only alphanumeric and whitespace
+    words = word_tokenize(text.lower())  # Tokenize and convert to lowercase
+
+    # Ensure all tokens are strings and remove non-alphabetic tokens
+    filtered_words = [word for word in words if isinstance(word, str) and word.isalpha() and word not in stop_words]
+
+    # Check if there are enough words for the requested n-gram size
+    if len(filtered_words) < ngram_range:
+        return []  # Return empty if insufficient words
+
+    # Generate n-grams
+    if ngram_range > 1:
+        ngram_words = [' '.join(ng) for ng in ngrams(filtered_words, ngram_range)]
+        keywords = Counter(ngram_words).most_common(20)  # Top 20 n-grams
+    else:
+        keywords = Counter(filtered_words).most_common(20)  # Top 20 unigrams
+
+    return [{"keyword": keyword, "count": count} for keyword, count in keywords]
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (you can restrict this to specific domains)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Request model
 class TextData(BaseModel):
     text: str
     ngram_size: int = 1  # Default to unigrams
-    top_n: int = 10      # Default to top 10
 
-# Preprocess text
-def preprocess_text(text: str) -> List[str]:
-    stop_words = set(stopwords.words("english"))
-    tokens = word_tokenize(text.lower())  # Tokenize and lowercase the text
-    filtered_tokens = [
-        token for token in tokens 
-        if token.is_alpha and token not in stop_words and token not in punctuation
-    ]
-    return filtered_tokens
-
-# Generate n-grams
-def generate_ngrams(tokens: List[str], n: int) -> List[str]:
-    return [' '.join(gram) for gram in ngrams(tokens, n)]
-
+# Define the `/ngrams` endpoint
 @app.post("/ngrams")
-def get_ngrams(data: TextData):
-    if data.ngram_size < 1:
-        raise HTTPException(status_code=400, detail="N-gram size must be 1 or greater.")
-    
-    # Preprocess the input text
-    tokens = preprocess_text(data.text)
+def get_keywords(data: TextData):
+    try:
+        print(f"Input Text: {data.text}")
+        print(f"N-Gram Size: {data.ngram_size}")
 
-    # Generate n-grams
-    ngrams_list = generate_ngrams(tokens, data.ngram_size)
-    
-    # Count n-grams
-    ngram_counts = Counter(ngrams_list)
+        # Extract keywords
+        keywords = extract_keywords_with_counts(data.text, ngram_range=data.ngram_size)
+        print(f"Extracted Keywords: {keywords}")
 
-    # Return the top N n-grams
-    top_ngrams = ngram_counts.most_common(data.top_n)
-
-    return {
-        "ngram_size": data.ngram_size,
-        "top_ngrams": [{"phrase": phrase, "count": count} for phrase, count in top_ngrams]
-    }
+        return {
+            "ngram_size": data.ngram_size,
+            "keywords": keywords
+        }
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

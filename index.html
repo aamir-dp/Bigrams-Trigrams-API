@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>N-Gram Generator</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <div class="app-container">
         <header>
@@ -15,16 +13,17 @@
         </header>
         <main>
             <form id="ngram-form">
-                <div class="text-input-container">
-                    <textarea id="input-text" placeholder="Start typing, or copy and paste your document here..."
-                        required></textarea>
+                <div class="input-container">
+                    <textarea id="input-text" placeholder="Paste your text here..." required></textarea>
                 </div>
                 <div class="controls">
                     <label for="ngram-size">Select N-Gram Size:</label>
                     <select id="ngram-size">
                         <option value="1">Unigrams</option>
-                        <option value="2">Bigrams</option>
+                        <option value="2" selected>Bigrams</option>
                         <option value="3">Trigrams</option>
+                        <option value="4">4-grams</option>
+                        <option value="5">5-grams</option>
                     </select>
                     <button type="submit">Generate</button>
                 </div>
@@ -37,5 +36,4 @@
     </div>
     <script src="script.js"></script>
 </body>
-
 </html>
