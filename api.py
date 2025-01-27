@@ -81,3 +81,7 @@ def get_keywords(data: TextData):
     except Exception as e:
         logging.error(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Keyword Extraction API!"}
