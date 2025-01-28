@@ -1,46 +1,46 @@
-// Define the API URL
-const API_URL = "https://bigrams-trigrams-api.onrender.com/ngrams"; // Replace with your Render API URL
-
+// script.js
 const form = document.getElementById("ngram-form");
+const resultDiv = document.getElementById("result");
 const ngramList = document.getElementById("ngram-list");
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault(); // Prevent default form submission
+// Your API URL
+const API_URL = "https://bigrams-trigrams-api.onrender.com/ngrams"; // Replace with your actual deployed URL
 
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // Get user input
     const text = document.getElementById("input-text").value;
     const ngramSize = document.getElementById("ngram-size").value;
-    const apiKey = document.getElementById("api-key").value; // Get the API key from the form
 
-    if (!text.trim() || !apiKey.trim()) {
-        alert("Please enter the text and API key.");
-        return;
-    }
-
+    // Send request to the API
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "api_key": apiKey, // Pass the API key from the input
             },
             body: JSON.stringify({
-                text: text, // Pass the text
-                ngram_size: parseInt(ngramSize), // Pass the n-gram size
+                text: text,
+                ngram_size: parseInt(ngramSize),
             }),
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch n-grams: ${response.statusText}`);
+            throw new Error("Failed to fetch n-grams");
         }
 
         const data = await response.json();
 
-        // Display the n-grams in the list
-        ngramList.innerHTML = data.keywords
-            .map((ngram) => `<li>${ngram.keyword} (${ngram.count})</li>`)
-            .join("");
+        // Update results on the page
+        ngramList.innerHTML = "";
+        data.keywords.forEach((ngram) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${ngram.keyword} (${ngram.count})`;
+            ngramList.appendChild(listItem);
+        });
     } catch (error) {
-        console.error("Error:", error);
+        console.error(error);
         ngramList.innerHTML = "<li>Something went wrong. Please try again.</li>";
     }
 });

@@ -3,29 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keyword Extraction Tool</title>
-    <link rel="stylesheet" href="style.css"> <!-- Link to your CSS file -->
+    <title>N-Gram Generator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Keyword Extraction Tool</h1>
-        <form id="ngram-form">
-            <textarea id="input-text" placeholder="Paste your text here..." rows="5"></textarea>
-            <select id="ngram-size">
-                <option value="1">Unigrams</option>
-                <option value="2" selected>Bigrams</option>
-                <option value="3">Trigrams</option>
-            </select>
-            <input type="password" id="api-key" placeholder="Enter your API key" required />
-            <button type="submit">Generate N-Grams</button>
-        </form>
+    <div class="app-container">
+        <header>
+            <h1>N-Gram Generator</h1>
+        </header>
+        <main>
+            <form id="ngram-form">
+                <div class="input-container">
+                    <textarea id="input-text" placeholder="Paste your text here..." required></textarea>
+                </div>
+                <div class="controls">
+                    <label for="ngram-size">Select N-Gram Size:</label>
+                    <select id="ngram-size">
+                        <option value="1">Unigrams</option>
+                        <option value="2" selected>Bigrams</option>
+                        <option value="3">Trigrams</option>
+                        <option value="4">4-grams</option>
+                        <option value="5">5-grams</option>
+                    </select>
+                    <button type="submit">Generate</button>
+                </div>
+            </form>
+            <section id="result">
+                <h2>Top N-Grams</h2>
+                <ul id="ngram-list"></ul>
+            </section>
+        </main>
     </div>
-
-    <section id="result">
-        <h2>Top N-Grams</h2>
-        <ul id="ngram-list"></ul>
-    </section>
-
-    <script src="script.js"></script> <!-- Link to your JavaScript file -->
+    <script src="script.js"></script>
 </body>
 </html>
